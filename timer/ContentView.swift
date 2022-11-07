@@ -43,24 +43,21 @@ struct ContentView: View {
 			}
 					.frame(minWidth: 240, minHeight: 240)
 					.background(Rectangle().foregroundColor(.black))
-					.gesture(startGesture)
-					.onTapGesture {
-						guard timer != nil else {
-							if !ready { time = 0 }
-							return
-						}
+//					.gesture(startGesture)
+					.background(KeyEventHandling(ready: {
+						guard !startMenu && !endMenu && !showTimes else { return }
+						ready = true
+					}, start: {
+						guard !startMenu && !endMenu && !showTimes else { return }
+						ready = false
+						startTime = Date.ms
 						timer?.invalidate()
-						timer = nil
-						time = (Date.ms - startTime)
-						times.append(time)
-						UserDefaults.standard.set(times, forKey: "times")
-						startTime = 0
-						if let prevRounds = roundsRemaining {
-							roundsRemaining = prevRounds - 1
-							if roundsRemaining == 0 {
-								endMenu = true
-							}
-						}
+						timer = Timer.scheduledTimer(withTimeInterval: 0.07, repeats: true, block: { _ in
+							time = (Date.ms - startTime)
+						})
+					}, end: end))
+					.onTapGesture {
+						end()
 					}
 			if showTimes {
 				VStack {
@@ -131,6 +128,25 @@ struct ContentView: View {
 		startMenu = false
 		totalRounds = rounds
 		roundsRemaining = rounds
+	}
+	
+	func end() {
+		guard timer != nil else {
+			if !ready { time = 0 }
+			return
+		}
+		timer?.invalidate()
+		timer = nil
+		time = (Date.ms - startTime)
+		times.append(time)
+		UserDefaults.standard.set(times, forKey: "times")
+		startTime = 0
+		if let prevRounds = roundsRemaining {
+			roundsRemaining = prevRounds - 1
+			if roundsRemaining == 0 {
+				endMenu = true
+			}
+		}
 	}
 	
 	var startGesture: some Gesture {

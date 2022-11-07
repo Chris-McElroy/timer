@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E6AA2392918F53600A4B782 /* keyInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E6AA2382918F53600A4B782 /* keyInput.swift */; };
 		1EB91264286C0F8C0086B752 /* timerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EB91263286C0F8C0086B752 /* timerApp.swift */; };
 		1EB91266286C0F8C0086B752 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EB91265286C0F8C0086B752 /* ContentView.swift */; };
 		1EB91268286C0F8D0086B752 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1EB91267286C0F8D0086B752 /* Assets.xcassets */; };
@@ -14,6 +15,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1E6AA2382918F53600A4B782 /* keyInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = keyInput.swift; sourceTree = "<group>"; };
 		1EB91260286C0F8C0086B752 /* timer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = timer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1EB91263286C0F8C0086B752 /* timerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = timerApp.swift; sourceTree = "<group>"; };
 		1EB91265286C0F8C0086B752 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -53,6 +55,7 @@
 			isa = PBXGroup;
 			children = (
 				1EB91263286C0F8C0086B752 /* timerApp.swift */,
+				1E6AA2382918F53600A4B782 /* keyInput.swift */,
 				1EB91265286C0F8C0086B752 /* ContentView.swift */,
 				1EB91267286C0F8D0086B752 /* Assets.xcassets */,
 				1EB91269286C0F8D0086B752 /* timer.entitlements */,
@@ -141,6 +144,7 @@
 			files = (
 				1EB91266286C0F8C0086B752 /* ContentView.swift in Sources */,
 				1EB91264286C0F8C0086B752 /* timerApp.swift in Sources */,
+				1E6AA2392918F53600A4B782 /* keyInput.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
