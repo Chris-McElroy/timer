@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// based off https://stackoverflow.com/a/61155272/8222178
 struct KeyEventHandling: NSViewRepresentable {
 	let view: KeyView = KeyView()
 	

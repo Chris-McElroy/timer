@@ -16,6 +16,7 @@ struct ContentView: View {
 	@State var times: [Int] = allTimes()
 	@State var startMenu: Bool = true
 	@State var endMenu: Bool = false
+	@State var finishedRounds: Bool = false
 	@State var totalRounds: Int? = nil
 	@State var roundsRemaining: Int? = nil
 	
@@ -45,10 +46,11 @@ struct ContentView: View {
 					.background(Rectangle().foregroundColor(.black))
 //					.gesture(startGesture)
 					.background(KeyEventHandling(ready: {
-						guard !startMenu && !endMenu && !showTimes else { return }
+						guard !startMenu && !finishedRounds && !showTimes else { return }
 						ready = true
+						time = 0
 					}, start: {
-						guard !startMenu && !endMenu && !showTimes else { return }
+						guard !startMenu && !finishedRounds && !showTimes else { return }
 						ready = false
 						startTime = Date.ms
 						timer?.invalidate()
@@ -131,10 +133,7 @@ struct ContentView: View {
 	}
 	
 	func end() {
-		guard timer != nil else {
-			if !ready { time = 0 }
-			return
-		}
+		guard timer != nil else { return }
 		timer?.invalidate()
 		timer = nil
 		time = (Date.ms - startTime)
@@ -144,7 +143,10 @@ struct ContentView: View {
 		if let prevRounds = roundsRemaining {
 			roundsRemaining = prevRounds - 1
 			if roundsRemaining == 0 {
-				endMenu = true
+				finishedRounds = true
+				Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false, block: { _ in
+					self.endMenu = true
+				})
 			}
 		}
 	}
