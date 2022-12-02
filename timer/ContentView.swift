@@ -26,13 +26,6 @@ struct ContentView: View {
 				Spacer()
 				VStack {
 					Spacer().frame(height: 100)
-					Text("times")
-//						.font(.system(size: 40))
-						.onTapGesture {
-							withAnimation {
-								showTimes.toggle()
-							}
-						}
 					Spacer()
 					Text(timeString(time))
 						.font(.system(size: 100))
@@ -57,10 +50,49 @@ struct ContentView: View {
 						timer = Timer.scheduledTimer(withTimeInterval: 0.07, repeats: true, block: { _ in
 							time = (Date.ms - startTime)
 						})
-					}, end: end))
+					}, end: end, showTimes: {
+						guard timer == nil else { end(); return }
+						showTimes.toggle()
+					}))
 					.onTapGesture {
 						end()
 					}
+			if startMenu {
+				VStack(spacing: 50) {
+					Text("1 round").onTapGesture { start(withRounds: 1) }
+					Text("3 rounds").onTapGesture { start(withRounds: 3) }
+					Text("5 rounds").onTapGesture { start(withRounds: 5) }
+				}
+				.frame(minWidth: 200, maxWidth: 1000, minHeight: 200, maxHeight: 1000)
+				.background(Rectangle().foregroundColor(.black))
+			}
+			if endMenu {
+				let rounds = totalRounds ?? 1
+				if rounds == 1 {
+					Text(timeString(times.last ?? 0))
+						.textSelection(.enabled)
+						.frame(minWidth: 200, maxWidth: 1000, minHeight: 200, maxHeight: 1000)
+						.background(Rectangle().foregroundColor(.black))
+						.font(.system(size: 36))
+				} else {
+					let roundTimes = times.dropFirst(times.count - rounds)
+					let middle = Double(roundTimes.sorted().dropFirst().dropLast().reduce(0, { $0 + $1 }))
+					let middleAv = Int((middle/Double(rounds - 2)).rounded(.toNearestOrAwayFromZero))
+					let maxTime = roundTimes.max() ?? 0
+					let minTime = roundTimes.min() ?? 0
+					let summaryString = roundTimes.map({
+						$0 == maxTime || $0 == minTime ? "(\(timeString($0)))" : timeString($0)
+					}).joined(separator: "  ")
+					VStack(spacing: 80) {
+						Text("score: \(timeString(middleAv))")
+						Text(summaryString)
+					}
+					.textSelection(.enabled)
+					.frame(minWidth: 200, maxWidth: 1000, minHeight: 200, maxHeight: 1000)
+					.background(Rectangle().foregroundColor(.black))
+					.font(.system(size: 36))
+				}
+			}
 			if showTimes {
 				VStack {
 					let sortedTimes = times.sorted()
@@ -84,38 +116,6 @@ struct ContentView: View {
 				.frame(minWidth: 240, minHeight: 240)
 				.background(Rectangle().foregroundColor(.black))
 			}
-			if startMenu {
-				VStack(spacing: 50) {
-					Text("1 round").onTapGesture { start(withRounds: 1) }
-					Text("5 rounds").onTapGesture { start(withRounds: 5) }
-					Text("indefinite").onTapGesture { start(withRounds: nil) }
-				}
-				.frame(minWidth: 200, maxWidth: 1000, minHeight: 200, maxHeight: 1000)
-				.background(Rectangle().foregroundColor(.black))
-			}
-			if endMenu {
-				let rounds = totalRounds ?? 1
-				if rounds == 1 {
-					VStack {
-						Text("time: \(timeString(times.last ?? 0))")
-					}
-					.frame(minWidth: 200, maxWidth: 1000, minHeight: 200, maxHeight: 1000)
-					.background(Rectangle().foregroundColor(.black))
-					.font(.system(size: 36))
-				} else {
-					let roundTimes = times.dropFirst(times.count - rounds)
-					let middle3 = Double(roundTimes.sorted().dropFirst().dropLast().reduce(0, { $0 + $1 }))
-					let middle3av = Int((middle3/Double(rounds - 2)).rounded(.toNearestOrAwayFromZero))
-					VStack(spacing: 50) {
-						Text("best time: \(timeString(roundTimes.min() ?? 0))")
-						Text("worst time: \(timeString(roundTimes.max() ?? 0))")
-						Text("middle average: \(timeString(middle3av))")
-					}
-					.frame(minWidth: 200, maxWidth: 1000, minHeight: 200, maxHeight: 1000)
-					.background(Rectangle().foregroundColor(.black))
-					.font(.system(size: 36))
-				}
-			}
 		}
 		.ignoresSafeArea()
 		.foregroundColor(.white)
@@ -123,7 +123,7 @@ struct ContentView: View {
     }
 	
 	static func allTimes() -> [Int] {
-		(UserDefaults.standard.array(forKey: "times") as? [Int] ?? []).sorted()
+		UserDefaults.standard.array(forKey: "times") as? [Int] ?? []
 	}
 	
 	func start(withRounds rounds: Int?) {
@@ -144,7 +144,7 @@ struct ContentView: View {
 			roundsRemaining = prevRounds - 1
 			if roundsRemaining == 0 {
 				finishedRounds = true
-				Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false, block: { _ in
+				Timer.scheduledTimer(withTimeInterval: 0.6, repeats: false, block: { _ in
 					self.endMenu = true
 				})
 			}

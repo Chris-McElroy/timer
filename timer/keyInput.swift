@@ -11,10 +11,11 @@ import SwiftUI
 struct KeyEventHandling: NSViewRepresentable {
 	let view: KeyView = KeyView()
 	
-	init(ready: @escaping () -> Void, start: @escaping () -> Void, end: @escaping () -> Void) {
+	init(ready: @escaping () -> Void, start: @escaping () -> Void, end: @escaping () -> Void, showTimes: @escaping () -> Void) {
 		view.ready = ready
 		view.start = start
 		view.end = end
+		view.showTimes = showTimes
 	}
 	
 	class KeyView: NSView {
@@ -27,11 +28,16 @@ struct KeyEventHandling: NSViewRepresentable {
 		var ready: () -> Void = {}
 		var start: () -> Void = {}
 		var end: () -> Void = {}
+		var showTimes: () -> Void = {}
 		
 		override var acceptsFirstResponder: Bool { true }
 		
 		override func keyDown(with event: NSEvent) {
-			end()
+			if event.characters == "t" {
+				showTimes()
+			} else {
+				end()
+			}
 		}
 		
 		override func flagsChanged(with event: NSEvent) {
