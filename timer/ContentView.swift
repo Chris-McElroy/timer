@@ -197,9 +197,7 @@ struct ContentView: View {
 			roundsRemaining = prevRounds - 1
 			if roundsRemaining == 0 {
 				finishedRounds = true
-				Timer.scheduledTimer(withTimeInterval: 0.6, repeats: false, block: { _ in
-					self.endMenu = true
-				})
+				endMenu = true
 			}
 		}
 		save = false
