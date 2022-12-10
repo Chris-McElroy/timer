@@ -12,6 +12,8 @@ struct ContentView: View {
 	@State var startTime: Int = 0
 	@State var timer: Timer? = nil
 	@State var ready: Bool = false
+	@State var save: Bool = false
+	@State var delete: Bool = false
 	@State var showTimes: Bool = false
 	@State var times: [Int] = allTimes()
 	@State var startMenu: Bool = true
@@ -19,6 +21,7 @@ struct ContentView: View {
 	@State var finishedRounds: Bool = false
 	@State var totalRounds: Int? = nil
 	@State var roundsRemaining: Int? = nil
+	@State var deleteRecordedTime: (Int, Int)? = nil
 	
     var body: some View {
 		ZStack {
@@ -30,30 +33,14 @@ struct ContentView: View {
 					Text(timeString(time))
 						.font(.system(size: 100))
 					Spacer()
-					Text(ready ? "ready" : (timer == nil ? "reset" : "end"))
+					Text(subText)
 					Spacer()
 				}
 				Spacer()
 			}
 					.frame(minWidth: 240, minHeight: 240)
 					.background(Rectangle().foregroundColor(.black))
-//					.gesture(startGesture)
-					.background(KeyEventHandling(ready: {
-						guard !startMenu && !finishedRounds && !showTimes else { return }
-						ready = true
-						time = 0
-					}, start: {
-						guard !startMenu && !finishedRounds && !showTimes else { return }
-						ready = false
-						startTime = Date.ms
-						timer?.invalidate()
-						timer = Timer.scheduledTimer(withTimeInterval: 0.07, repeats: true, block: { _ in
-							time = (Date.ms - startTime)
-						})
-					}, end: end, showTimes: {
-						guard timer == nil else { end(); return }
-						showTimes.toggle()
-					}))
+					.background(KeyEventHandling(handleKeyDown: handleKeyDown, ready: setReady, start: startTimer, end: end))
 					.onTapGesture {
 						end()
 					}
@@ -99,13 +86,13 @@ struct ContentView: View {
 					ForEach(0..<10, id: \.self) { i in
 						if sortedTimes.count > i {
 							HStack {
+								if deleteRecordedTime?.0 == i {
+									Text("delete")
+								}
 								Text(timeString(sortedTimes[i]))
-								Text("X")
+								Text(deleteRecordedTime?.0 == i ? "?" : "X")
 									.onTapGesture {
-										if let badI = times.firstIndex(of: sortedTimes[i]) {
-											times.remove(at: badI)
-											UserDefaults.standard.set(times, forKey: "times")
-										}
+										deleteRecordedTime = (i, sortedTimes[i])
 									}
 							}
 						} else {
@@ -122,6 +109,13 @@ struct ContentView: View {
 		.background(Rectangle().foregroundColor(.black))
     }
 	
+	var subText: String {
+		if ready { return "ready" }
+		if delete { return "delete?" }
+		if save { return "save?" }
+		return ""
+	}
+	
 	static func allTimes() -> [Int] {
 		UserDefaults.standard.array(forKey: "times") as? [Int] ?? []
 	}
@@ -132,11 +126,70 @@ struct ContentView: View {
 		roundsRemaining = rounds
 	}
 	
+	func startTimer() {
+		guard !startMenu && !finishedRounds && !showTimes && !save else { return }
+		ready = false
+		startTime = Date.ms
+		timer?.invalidate()
+		timer = Timer.scheduledTimer(withTimeInterval: 0.07, repeats: true, block: { _ in
+			time = (Date.ms - startTime)
+		})
+	}
+	
+	func setReady() {
+		guard !startMenu && !finishedRounds && !showTimes && !save else { return }
+		ready = true
+		time = 0
+	}
+	
 	func end() {
 		guard timer != nil else { return }
 		timer?.invalidate()
 		timer = nil
 		time = (Date.ms - startTime)
+		save = true
+	}
+	
+	func handleKeyDown(event: NSEvent) {
+		guard timer == nil else { end(); return }
+		
+		if event.characters == "t" {
+			showTimes.toggle()
+			return
+		}
+		
+		if delete {
+			if event.specialKey == .delete {
+				deleteTime()
+			} else {
+				delete = false
+			}
+			return
+		}
+		
+		if save && event.characters == "s" && event.modifierFlags.contains(.command) {
+			saveTime()
+			return
+		}
+		
+		if save && event.characters == "i" && event.modifierFlags.contains(.command) {
+			delete = true
+			return
+		}
+		
+		if let deleteRecordedTime {
+			if event.characters == "i" && event.modifierFlags.contains(.command) {
+				if let badI = times.lastIndex(of: deleteRecordedTime.1) {
+					times.remove(at: badI)
+					UserDefaults.standard.set(times, forKey: "times")
+				}
+			}
+			self.deleteRecordedTime = nil
+			return
+		}
+	}
+	
+	func saveTime() {
 		times.append(time)
 		UserDefaults.standard.set(times, forKey: "times")
 		startTime = 0
@@ -149,23 +202,16 @@ struct ContentView: View {
 				})
 			}
 		}
+		save = false
 	}
 	
-	var startGesture: some Gesture {
-		RotationGesture(minimumAngleDelta: .zero)
-			.onChanged { _ in
-				ready = true
-			}
-			.onEnded { _ in
-				ready = false
-				startTime = Date.ms
-				timer?.invalidate()
-				timer = Timer.scheduledTimer(withTimeInterval: 0.07, repeats: true, block: { _ in
-					time = (Date.ms - startTime)
-				})
-			}
+	func deleteTime() {
+		time = 0
+		startTime = 0
+		delete = false
+		save = false
 	}
-	
+
 	func timeString(_ n: Int) -> String {
 		String(format: "%01d.%02d", n/1000, (n/10) % 100)
 	}
