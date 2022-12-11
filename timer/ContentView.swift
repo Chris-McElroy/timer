@@ -158,6 +158,19 @@ struct ContentView: View {
 			return
 		}
 		
+		if showTimes {
+			if let deleteRecordedTime {
+				if event.characters == "i" && event.modifierFlags.contains(.command) {
+					if let badI = times.lastIndex(of: deleteRecordedTime.1) {
+						times.remove(at: badI)
+						UserDefaults.standard.set(times, forKey: "times")
+					}
+				}
+				self.deleteRecordedTime = nil
+			}
+			return
+		}
+		
 		if delete {
 			if event.specialKey == .delete {
 				deleteTime()
@@ -174,17 +187,6 @@ struct ContentView: View {
 		
 		if save && event.characters == "i" && event.modifierFlags.contains(.command) {
 			delete = true
-			return
-		}
-		
-		if let deleteRecordedTime {
-			if event.characters == "i" && event.modifierFlags.contains(.command) {
-				if let badI = times.lastIndex(of: deleteRecordedTime.1) {
-					times.remove(at: badI)
-					UserDefaults.standard.set(times, forKey: "times")
-				}
-			}
-			self.deleteRecordedTime = nil
 			return
 		}
 	}
