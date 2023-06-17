@@ -153,7 +153,7 @@ struct ContentView: View {
 	func handleKeyDown(event: NSEvent) {
 		guard timer == nil else { end(); return }
 		
-		if event.characters == "t" {
+		if event.characters == "t" && event.modifierFlags.rawValue == 256 {
 			showTimes.toggle()
 			return
 		}
