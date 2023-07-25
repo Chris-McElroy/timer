@@ -15,6 +15,7 @@ struct ContentView: View {
 	@State var save: Bool = false
 	@State var delete: Bool = false
 	@State var showTimes: Bool = false
+	@State var showMinutes: Bool = false
 	@State var times: [Int] = allTimes()
 	@State var startMenu: Bool = true
 	@State var endMenu: Bool = false
@@ -22,6 +23,7 @@ struct ContentView: View {
 	@State var totalRounds: Int? = nil
 	@State var roundsRemaining: Int? = nil
 	@State var deleteRecordedTime: (Int, Int)? = nil
+	@State var update: Bool = false
 	
     var body: some View {
 		ZStack {
@@ -32,7 +34,7 @@ struct ContentView: View {
 					Spacer()
 					Text(timeString(time))
 						.font(.system(size: 100))
-					Spacer()
+					Spacer().opacity(update ? 1 : 0)
 					Text(subText)
 					Spacer()
 				}
@@ -49,6 +51,7 @@ struct ContentView: View {
 					Text("1 round").onTapGesture { start(withRounds: 1) }
 					Text("3 rounds").onTapGesture { start(withRounds: 3) }
 					Text("5 rounds").onTapGesture { start(withRounds: 5) }
+					Text("indefinite").onTapGesture { start(withRounds: nil) }
 				}
 				.frame(minWidth: 200, maxWidth: 1000, minHeight: 200, maxHeight: 1000)
 				.background(Rectangle().foregroundColor(.black))
@@ -82,12 +85,15 @@ struct ContentView: View {
 			}
 			if showTimes {
 				VStack {
+					Spacer()
 					let sortedTimes = times.sorted()
 					ForEach(0..<10, id: \.self) { i in
 						if sortedTimes.count > i {
 							HStack {
 								if deleteRecordedTime?.0 == i {
 									Text("delete")
+								} else {
+									Text(String(i + 1) + ".")
 								}
 								Text(timeString(sortedTimes[i]))
 								Text(deleteRecordedTime?.0 == i ? "?" : "X")
@@ -99,6 +105,24 @@ struct ContentView: View {
 							Text("xx")
 						}
 					}
+					Spacer()
+					if times.count > 5 {
+						Text("past 5 average " + timeString(times.dropFirst(times.count - 5).reduce(0, { $0 + $1 })/5))
+						 .padding(5)
+					}
+					if times.count > 25 {
+						Text("past 25 average " + timeString(times.dropFirst(times.count - 25).reduce(0, { $0 + $1 })/25))
+						 .padding(5)
+					}
+					if times.count >= 100 {
+						Text("past 100 average " + timeString(times.dropFirst(times.count - 100).reduce(0, { $0 + $1 })/100))
+							.padding(5)
+					}
+					Text("lifetime average " + timeString(times.reduce(0, { $0 + $1 })/times.count))
+						.padding(5)
+					Text("total count " + String(times.count))
+						.padding(5)
+					Spacer()
 				}
 				.frame(minWidth: 240, minHeight: 240)
 				.background(Rectangle().foregroundColor(.black))
@@ -158,6 +182,11 @@ struct ContentView: View {
 			return
 		}
 		
+		if event.characters == "m" && event.modifierFlags.rawValue == 256 {
+			showMinutes.toggle()
+			return
+		}
+		
 		if showTimes {
 			if let deleteRecordedTime {
 				if event.characters == "i" && event.modifierFlags.contains(.command) {
@@ -213,10 +242,12 @@ struct ContentView: View {
 	}
 
 	func timeString(_ n: Int) -> String {
-		String(format: "%01d.%02d", n/1000, (n/10) % 100)
+		if showMinutes {
+			return String(format: "%01d:%02d.%02d", n/60000, (n/1000) % 60, (n/10) % 100)
+		}
+		return String(format: "%01d.%02d", n/1000, (n/10) % 100)
 	}
 }
-
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {

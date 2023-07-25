@@ -21,7 +21,7 @@ struct KeyEventHandling: NSViewRepresentable {
 	class KeyView: NSView {
 		let leftControl = NSEvent.ModifierFlags(rawValue: 1048840)
 		let rightOption = NSEvent.ModifierFlags(rawValue: 270592) // was 524608
-		let readyKeys = NSEvent.ModifierFlags(rawValue: 1319176) // was 1573192
+		let readyKeys = NSEvent.ModifierFlags(rawValue: 1319176) // was 1573192 // chris 1319176 // vera 1048856
 		var lastPress: NSEvent.ModifierFlags = NSEvent.ModifierFlags.init([])
 		var spaceTimer: Timer? = nil
 		

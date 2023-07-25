@@ -19,6 +19,14 @@ struct timerApp: App {
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+	func applicationDidFinishLaunching(_ notification: Notification) {
+		if let window = NSApplication.shared.windows.first {
+			window.titleVisibility = .hidden
+			window.titlebarAppearsTransparent = true
+		}
+		return
+	}
+	
 	func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
 		return true
 	}
